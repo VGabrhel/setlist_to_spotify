@@ -167,6 +167,8 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
                 4. Make sure these Redirect URIs are added:
                    - `https://setlist-to-playlist.streamlit.app` (for production)
                    - `https://setlist-to-playlist.streamlit.app/` (with trailing slash)
+                   - `http://localhost:8501` (for local development)
+                   - `http://localhost:8501/` (with trailing slash)
                 
                 Error details: {str(e)}
             """)
