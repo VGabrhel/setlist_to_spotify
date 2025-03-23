@@ -4,7 +4,6 @@ Setlist to Spotify - Main application
 
 import streamlit as st
 import os
-from dotenv import load_dotenv
 import logging
 
 from src.spotify import (
@@ -22,12 +21,9 @@ from src.utils import (
     format_song_display
 )
 
-# Load environment variables
-load_dotenv()
-
 # Configure logging
 logging.basicConfig(
-    level=os.getenv('LOG_LEVEL', 'INFO'),
+    level=st.secrets.get("LOG_LEVEL", "INFO"),
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
@@ -37,6 +33,11 @@ st.set_page_config(
     page_icon="🎵",
     layout="wide"
 )
+
+# Set environment variables from secrets
+os.environ["SPOTIPY_CLIENT_ID"] = st.secrets["SPOTIPY_CLIENT_ID"]
+os.environ["SPOTIPY_CLIENT_SECRET"] = st.secrets["SPOTIPY_CLIENT_SECRET"]
+os.environ["SETLISTFM_API_KEY"] = st.secrets["SETLISTFM_API_KEY"]
 
 # Check for Spotify authentication callback
 if "code" in st.query_params and not "spotify_token_info" in st.session_state:
