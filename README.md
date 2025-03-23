@@ -1,89 +1,85 @@
 # Setlist to Spotify
 
-Create Spotify playlists from your favorite band's latest tour setlist. This application fetches setlist data from Setlist.fm and creates a Spotify playlist with the songs.
-
-## Features
-
-- Search for artists and view their latest tour setlists
-- Create Spotify playlists from setlists
-- Automatic handling of cover songs
-- Support for main sets and encores
-- Playlist cover image from artist photos
-- Session state preservation during authentication
-
-## Prerequisites
-
-- Python 3.8 or higher
-- Spotify Developer Account
-- Setlist.fm API Key
+Create Spotify playlists from your favorite band's latest tour setlist using data from Setlist.fm.
 
 ## Setup
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/setlist-to-spotify.git
-cd setlist-to-spotify
-```
-
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
+1. Clone this repository
+2. Create a virtual environment and activate it:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-4. Create a `.env` file in the root directory with your API credentials:
-```env
-# Spotify API Credentials
-SPOTIPY_CLIENT_ID=your_spotify_client_id
-SPOTIPY_CLIENT_SECRET=your_spotify_client_secret
+## Configuration
 
-# Setlist.fm API Key
-SETLISTFM_API_KEY=your_setlistfm_api_key
+### Setting up Streamlit Secrets
 
-# Optional Debug Settings
-LOG_LEVEL=INFO
-```
+1. Create a `.streamlit` directory in your project root:
+   ```bash
+   mkdir .streamlit
+   ```
 
-5. Configure Spotify App:
-   - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-   - Create a new application
-   - Add `http://localhost:8501` to the Redirect URIs
-   - Copy the Client ID and Client Secret to your `.env` file
+2. Create a `secrets.toml` file in the `.streamlit` directory with your API credentials:
+   ```toml
+   # Spotify API Credentials
+   [spotify]
+   client_id = "your_client_id_here"
+   client_secret = "your_client_secret_here"
 
-6. Get Setlist.fm API Key:
-   - Go to [Setlist.fm API](https://api.setlist.fm/docs/1.0/index.html)
-   - Create an account and request an API key
-   - Copy the API key to your `.env` file
+   # Setlist.fm API Key
+   [setlistfm]
+   api_key = "your_setlistfm_api_key_here"
 
-## Running the Application
+   # Optional Logging Settings
+   [logging]
+   level = "INFO"
+   ```
 
-1. Ensure your virtual environment is activated
-2. Run the Streamlit app:
-```bash
-streamlit run app.py
-```
+3. Replace the placeholder values with your actual API credentials:
+   - Get Spotify API credentials from the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+   - Get Setlist.fm API key from [Setlist.fm API](https://api.setlist.fm/docs/1.0/index.html)
 
-3. Open your browser and navigate to `http://localhost:8501`
+### Configuring Spotify App
 
-## Usage
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+2. Create a new app or select your existing app
+3. Click "Edit Settings"
+4. Add the following Redirect URIs:
+   - `http://localhost:8501` (for local development)
+   - Your deployed app URL (e.g., `https://your-app-name.streamlit.app/`)
+5. Click "Save"
 
-1. Connect to Spotify using the button in the sidebar
-2. Search for an artist
-3. Review the setlist
-4. Click "Create Playlist" to create a Spotify playlist with the songs
+## Running the App
+
+1. Start the Streamlit app:
+   ```bash
+   streamlit run app.py
+   ```
+2. Open your browser and navigate to `http://localhost:8501`
+3. Connect your Spotify account
+4. Search for an artist
+5. Create a playlist from their latest setlist
+
+## Features
+
+- Search for artists using Setlist.fm data
+- View latest tour setlists
+- Create Spotify playlists automatically
+- Support for covers and special song notes
+- Beautiful and intuitive interface
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 

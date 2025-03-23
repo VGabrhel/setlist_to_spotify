@@ -23,9 +23,41 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     Returns:
         spotipy.oauth2.SpotifyOAuth: The Spotify authentication manager.
     """
-    # Use hardcoded credentials for the app
-    client_id = "5c532dca876244fcac1675c51e92e51a"
-    client_secret = "e9f5d69eae9141b384221da0691dd939"
+    try:
+        # Get credentials from Streamlit secrets
+        if "spotify" not in st.secrets:
+            raise ValueError("Spotify credentials not found in Streamlit secrets")
+        
+        client_id = st.secrets["spotify"]["client_id"]
+        client_secret = st.secrets["spotify"]["client_secret"]
+        
+        if not client_id or not client_secret:
+            raise ValueError("Spotify credentials are empty")
+            
+        logging.info("Successfully loaded Spotify credentials")
+        
+    except Exception as e:
+        error_msg = f"""
+            Failed to load Spotify credentials: {str(e)}
+            
+            To set up your credentials:
+            1. Go to your Streamlit Cloud dashboard
+            2. Select your app
+            3. Click on "Settings" → "Secrets"
+            4. Add your Spotify credentials in this format:
+            
+            [spotify]
+            client_id = "your_client_id"
+            client_secret = "your_client_secret"
+            
+            Make sure to:
+            1. Copy the exact credentials from your Spotify Developer Dashboard
+            2. Include the quotes around the values
+            3. Don't add any extra spaces or newlines
+        """
+        st.error(error_msg)
+        logging.error(f"Spotify credentials error: {str(e)}")
+        raise
     
     # Define scopes if not provided
     if scope is None:
@@ -36,8 +68,15 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
             "user-read-email"
         ])
     
-    # Use localhost for development
-    redirect_uri = "http://localhost:8501"
+    # Get the current URL for the redirect URI
+    if "code" in st.query_params:
+        # If we're handling the callback, use the current URL
+        redirect_uri = st.query_params.get("redirect_uri", "http://localhost:8501")
+    else:
+        # Otherwise, use the app's URL
+        redirect_uri = "http://localhost:8501"
+    
+    logging.info(f"Using redirect URI: {redirect_uri}")
     
     # Create the auth manager with all necessary parameters
     auth_manager = SpotifyOAuth(

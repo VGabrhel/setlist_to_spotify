@@ -123,13 +123,54 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
         cache_file = f".spotify_caches-{st.session_state['user_id']}"
         
         # Initialize Spotify auth manager
-        spotify_auth_manager = get_spotify_auth_manager(cache_path=cache_file)
+        try:
+            spotify_auth_manager = get_spotify_auth_manager(cache_path=cache_file)
+        except Exception as e:
+            st.error(f"""
+                Failed to initialize Spotify connection. Please check your Spotify API credentials.
+                
+                Error details: {str(e)}
+                
+                If you're running this locally:
+                1. Make sure you have a `.streamlit/secrets.toml` file with your Spotify credentials
+                2. The credentials should be in this format:
+                   ```toml
+                   [spotify]
+                   client_id = "your_client_id"
+                   client_secret = "your_client_secret"
+                   ```
+                
+                If you're running on Streamlit Cloud:
+                1. Go to your app's settings
+                2. Click on "Secrets"
+                3. Add your Spotify credentials in the same format
+            """)
+            st.stop()
         
         # Get the authorization code from the URL
         auth_code = st.query_params["code"]
         
         # Exchange the code for a token and cache it
-        token_info = spotify_auth_manager.get_access_token(auth_code, as_dict=False)
+        try:
+            token_info = spotify_auth_manager.get_access_token(auth_code)
+        except Exception as e:
+            st.error(f"""
+                Failed to get access token from Spotify. This might be because:
+                1. The authorization was denied or timed out
+                2. The redirect URI doesn't match what's configured in your Spotify app
+                3. The app credentials are incorrect
+                
+                Please check your Spotify app settings:
+                1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+                2. Select your app
+                3. Click "Edit Settings"
+                4. Make sure these Redirect URIs are added:
+                   - `http://localhost:8501` (for local development)
+                   - Your deployed app URL (e.g., `https://your-app-name.streamlit.app/`)
+                
+                Error details: {str(e)}
+            """)
+            st.stop()
         
         if token_info:
             # Store the token info in session state
@@ -154,7 +195,7 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
             Failed to connect to your Spotify account. This might be because:
             1. The authorization was denied or timed out
             2. There was a temporary connection issue
-            3. The app is in development mode and needs to be approved by Spotify
+            3. The app credentials are incorrect
             
             Please try again. If the problem persists, refresh the page.
             
