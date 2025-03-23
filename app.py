@@ -53,10 +53,6 @@ This app will help you create playlists in your Spotify account using setlist da
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = str(uuid.uuid4())
 
-# Initialize session state for Spotify credentials if not exists
-if "spotify_credentials" not in st.session_state:
-    st.session_state["spotify_credentials"] = None
-
 # Sidebar for configuration
 with st.sidebar:
     st.header("About")
@@ -64,36 +60,12 @@ with st.sidebar:
         This app lets you create Spotify playlists based on artists' latest tour setlists.
         
         To use this app:
-        1. Enter your Spotify API credentials
-        2. Connect with your Spotify account
-        3. Search for an artist
-        4. Create the playlist in your account
+        1. Connect with your Spotify account
+        2. Search for an artist
+        3. Create the playlist in your account
     """)
     
-    st.header("Step 1: Spotify Setup")
-    
-    # Spotify API Credentials Input
-    st.subheader("Spotify API Credentials")
-    st.info("""
-        To get your Spotify API credentials:
-        1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-        2. Create a new app
-        3. Add `http://localhost:8501` as a Redirect URI in your app settings
-        4. Copy the Client ID and Client Secret
-    """)
-    
-    client_id = st.text_input("Spotify Client ID", type="password")
-    client_secret = st.text_input("Spotify Client Secret", type="password")
-    
-    if client_id and client_secret:
-        st.session_state["spotify_credentials"] = {
-            "client_id": client_id,
-            "client_secret": client_secret
-        }
-        st.success("✓ Spotify API credentials saved")
-    
-    # Spotify Connection
-    st.subheader("Connect to Spotify")
+    st.header("Step 1: Connect to Spotify")
     spotify_connected = False
     
     if "spotify_token_info" in st.session_state:
@@ -112,48 +84,37 @@ with st.sidebar:
             st.rerun()
     else:
         st.warning("⚠️ Not connected to Spotify")
-        if st.session_state["spotify_credentials"]:
-            try:
-                # Create a unique cache file for this user
-                cache_file = f".spotify_caches-{st.session_state['user_id']}"
+        try:
+            # Create a unique cache file for this user
+            cache_file = f".spotify_caches-{st.session_state['user_id']}"
+            
+            spotify_auth_manager = get_spotify_auth_manager(
+                scope="playlist-modify-public playlist-modify-private user-read-private",
+                cache_path=cache_file
+            )
+            
+            st.info("👉 Connect your Spotify account to create playlists")
+            if st.button("Connect to Spotify", key="connect_button"):
+                # Store current state before authentication
+                st.session_state["pre_auth_state"] = {
+                    "search_query": st.session_state.get("last_search", ""),
+                    "current_artist": st.session_state.get("current_artist", None),
+                    "current_setlist": st.session_state.get("current_setlist", None),
+                    "selected_artist": st.session_state.get("selected_artist", None),
+                    "selected_setlist": st.session_state.get("selected_setlist", None)
+                }
                 
-                # Set environment variables temporarily for this session
-                os.environ["SPOTIPY_CLIENT_ID"] = st.session_state["spotify_credentials"]["client_id"]
-                os.environ["SPOTIPY_CLIENT_SECRET"] = st.session_state["spotify_credentials"]["client_secret"]
-                
-                spotify_auth_manager = get_spotify_auth_manager(
-                    scope="playlist-modify-public playlist-modify-private user-read-private",
-                    cache_path=cache_file
-                )
-                
-                st.info("👉 Connect your Spotify account to create playlists")
-                if st.button("Connect to Spotify", key="connect_button"):
-                    # Store current state before authentication
-                    st.session_state["pre_auth_state"] = {
-                        "search_query": st.session_state.get("last_search", ""),
-                        "current_artist": st.session_state.get("current_artist", None),
-                        "current_setlist": st.session_state.get("current_setlist", None),
-                        "selected_artist": st.session_state.get("selected_artist", None),
-                        "selected_setlist": st.session_state.get("selected_setlist", None)
-                    }
-                    
-                    # Get authorization URL and redirect
-                    auth_url = spotify_auth_manager.get_authorize_url()
-                    st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
-            except Exception as e:
-                st.error("Failed to initialize Spotify connection. Please try again later.")
-        else:
-            st.warning("Please enter your Spotify API credentials above")
+                # Get authorization URL and redirect
+                auth_url = spotify_auth_manager.get_authorize_url()
+                st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
+        except Exception as e:
+            st.error("Failed to initialize Spotify connection. Please try again later.")
 
 # Check for Spotify authentication callback
 if "code" in st.query_params and not "spotify_token_info" in st.session_state:
     try:
         # Create a unique cache file for this user
         cache_file = f".spotify_caches-{st.session_state['user_id']}"
-        
-        # Set environment variables temporarily for this session
-        os.environ["SPOTIPY_CLIENT_ID"] = st.session_state["spotify_credentials"]["client_id"]
-        os.environ["SPOTIPY_CLIENT_SECRET"] = st.session_state["spotify_credentials"]["client_secret"]
         
         spotify_auth_manager = get_spotify_auth_manager(
             scope="playlist-modify-public playlist-modify-private user-read-private",

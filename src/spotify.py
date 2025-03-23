@@ -23,15 +23,9 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     Returns:
         spotipy.oauth2.SpotifyOAuth: The Spotify authentication manager.
     """
-    # Get Spotify credentials from environment variables
-    client_id = os.getenv("SPOTIPY_CLIENT_ID")
-    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
-    
-    if not client_id or not client_secret:
-        raise ValueError(
-            "Spotify API credentials not found. Please make sure SPOTIPY_CLIENT_ID and "
-            "SPOTIPY_CLIENT_SECRET environment variables are set."
-        )
+    # Use hardcoded credentials for the app
+    client_id = "5c532dca876244fcac1675c51e92e51a"
+    client_secret = "e9f5d69eae9141b384221da0691dd939"
     
     # Use a simple redirect URI that works in both local and deployed environments
     redirect_uri = "http://localhost:8501"
