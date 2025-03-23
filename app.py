@@ -10,7 +10,9 @@ import sys
 from pathlib import Path
 
 # Add the project root directory to Python path
-sys.path.append(str(Path(__file__).parent))
+current_dir = Path(__file__).parent.resolve()
+if str(current_dir) not in sys.path:
+    sys.path.insert(0, str(current_dir))
 
 from src.spotify import (
     get_spotify_auth_manager,
@@ -63,7 +65,10 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
         )
         
         auth_code = st.query_params["code"]
-        token_info = spotify_auth_manager.get_access_token(auth_code)
+        # Use get_cached_token instead of get_access_token
+        token_info = spotify_auth_manager.get_cached_token()
+        if not token_info:
+            token_info = spotify_auth_manager.get_access_token(auth_code)
         st.session_state["spotify_token_info"] = token_info
         
         # Clear the URL parameters
