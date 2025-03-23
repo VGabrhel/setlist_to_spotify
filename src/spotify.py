@@ -10,6 +10,7 @@ from PIL import Image
 import io
 import requests
 import base64
+import streamlit as st
 
 def get_spotify_auth_manager(scope=None, cache_path=None):
     """
@@ -22,8 +23,14 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     Returns:
         spotipy.oauth2.SpotifyOAuth: The Spotify authentication manager.
     """
-    # Use the deployed app URL as the redirect URI
-    redirect_uri = "https://setlist-to-spotify.streamlit.app/"
+    # Determine if we're running locally or in production
+    is_local = not st.runtime.exists()
+    
+    if is_local:
+        redirect_uri = "http://localhost:8501"
+    else:
+        # Use the deployed app URL
+        redirect_uri = "https://setlist-to-spotify.streamlit.app"
     
     return SpotifyOAuth(
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
