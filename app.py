@@ -128,11 +128,13 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
         # Get the authorization code from the URL
         auth_code = st.query_params["code"]
         
-        # Exchange the code for a token
-        token_info = spotify_auth_manager.get_access_token(auth_code)
+        # Exchange the code for a token and cache it
+        token_info = spotify_auth_manager.get_access_token(auth_code, as_dict=False)
         
         if token_info:
+            # Store the token info in session state
             st.session_state["spotify_token_info"] = token_info
+            
             # Clear the URL parameters
             st.query_params.clear()
             st.success("Successfully connected to your Spotify account!")

@@ -53,6 +53,8 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
 
 def get_spotify_client(auth_token):
     """Get an authenticated Spotify client"""
+    if isinstance(auth_token, dict):
+        auth_token = auth_token.get('access_token')
     return spotipy.Spotify(auth=auth_token)
 
 def search_track_on_spotify(sp, song_name, artist_name=None):
