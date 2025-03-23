@@ -27,8 +27,8 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     client_id = "5c532dca876244fcac1675c51e92e51a"
     client_secret = "e9f5d69eae9141b384221da0691dd939"
     
-    # Use a simple redirect URI that works in both local and deployed environments
-    redirect_uri = "http://localhost:8501"
+    # Use the Streamlit Cloud URL as the redirect URI
+    redirect_uri = "https://setlist-to-spotify.streamlit.app/"
     
     return SpotifyOAuth(
         client_id=client_id,
