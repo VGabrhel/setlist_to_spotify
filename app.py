@@ -104,25 +104,28 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
             cache_path=cache_file
         )
         
+        # Get the authorization code from the URL
         auth_code = st.query_params["code"]
-        # Use get_cached_token instead of get_access_token
-        token_info = spotify_auth_manager.get_cached_token()
-        if not token_info:
-            token_info = spotify_auth_manager.get_access_token(auth_code)
-        st.session_state["spotify_token_info"] = token_info
         
-        # Clear the URL parameters
-        st.query_params.clear()
-        st.success("Successfully connected to your Spotify account!")
+        # Exchange the code for a token
+        token_info = spotify_auth_manager.get_access_token(auth_code)
         
-        # Restore the previous state if it exists
-        if "pre_auth_state" in st.session_state:
-            for key, value in st.session_state["pre_auth_state"].items():
-                if value is not None:
-                    st.session_state[key] = value
-            del st.session_state["pre_auth_state"]
-        
-        st.rerun()
+        if token_info:
+            st.session_state["spotify_token_info"] = token_info
+            # Clear the URL parameters
+            st.query_params.clear()
+            st.success("Successfully connected to your Spotify account!")
+            
+            # Restore the previous state if it exists
+            if "pre_auth_state" in st.session_state:
+                for key, value in st.session_state["pre_auth_state"].items():
+                    if value is not None:
+                        st.session_state[key] = value
+                del st.session_state["pre_auth_state"]
+            
+            st.rerun()
+        else:
+            st.error("Failed to get access token. Please try again.")
     except Exception as e:
         st.error(f"""
             Failed to connect to your Spotify account. This might be because:
