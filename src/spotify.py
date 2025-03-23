@@ -68,15 +68,32 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
             "user-read-email"
         ])
     
-    # Get the current URL for the redirect URI
-    if "code" in st.query_params:
-        # If we're handling the callback, use the current URL
-        redirect_uri = st.query_params.get("redirect_uri", "http://localhost:8501")
-    else:
-        # Otherwise, use the app's URL
-        redirect_uri = "http://localhost:8501"
-    
-    logging.info(f"Using redirect URI: {redirect_uri}")
+    # Determine the redirect URI based on the environment
+    try:
+        # Try to get the current URL from Streamlit
+        current_url = st.experimental_get_query_params().get("redirect_uri", [None])[0]
+        
+        if current_url:
+            # If we have a redirect_uri in the query params, use it
+            redirect_uri = current_url
+        else:
+            # Check if we're running on Streamlit Cloud
+            if os.getenv("STREAMLIT_SERVER_ADDRESS", "").startswith("https://"):
+                # We're on Streamlit Cloud, use the current URL
+                redirect_uri = f"https://{os.getenv('STREAMLIT_SERVER_ADDRESS', '')}"
+            else:
+                # Local development
+                redirect_uri = "http://localhost:8501"
+        
+        # Ensure the redirect URI ends with a trailing slash
+        if not redirect_uri.endswith("/"):
+            redirect_uri += "/"
+            
+        logging.info(f"Using redirect URI: {redirect_uri}")
+        
+    except Exception as e:
+        logging.error(f"Error determining redirect URI: {str(e)}")
+        redirect_uri = "http://localhost:8501/"
     
     # Create the auth manager with all necessary parameters
     auth_manager = SpotifyOAuth(
