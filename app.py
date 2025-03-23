@@ -5,6 +5,7 @@ Setlist to Spotify - Main application
 import streamlit as st
 import os
 import logging
+import uuid
 
 from src.spotify import (
     get_spotify_auth_manager,
@@ -39,11 +40,19 @@ os.environ["SPOTIPY_CLIENT_ID"] = st.secrets["SPOTIPY_CLIENT_ID"]
 os.environ["SPOTIPY_CLIENT_SECRET"] = st.secrets["SPOTIPY_CLIENT_SECRET"]
 os.environ["SETLISTFM_API_KEY"] = st.secrets["SETLISTFM_API_KEY"]
 
+# Initialize session state for user ID if not exists
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = str(uuid.uuid4())
+
 # Check for Spotify authentication callback
 if "code" in st.query_params and not "spotify_token_info" in st.session_state:
     try:
+        # Create a unique cache file for this user
+        cache_file = f".spotify_caches-{st.session_state['user_id']}"
+        
         spotify_auth_manager = get_spotify_auth_manager(
-            scope="playlist-modify-public playlist-modify-private user-read-private"
+            scope="playlist-modify-public playlist-modify-private user-read-private",
+            cache_path=cache_file
         )
         
         auth_code = st.query_params["code"]
@@ -93,15 +102,20 @@ with st.sidebar:
             for key in keys_to_clear:
                 if key in st.session_state:
                     del st.session_state[key]
-            # Remove the cache file if it exists
-            if os.path.exists(".spotify_caches"):
-                os.remove(".spotify_caches")
+            # Remove the user-specific cache file if it exists
+            cache_file = f".spotify_caches-{st.session_state['user_id']}"
+            if os.path.exists(cache_file):
+                os.remove(cache_file)
             st.rerun()
     else:
         st.warning("⚠️ Not connected to Spotify")
         try:
+            # Create a unique cache file for this user
+            cache_file = f".spotify_caches-{st.session_state['user_id']}"
+            
             spotify_auth_manager = get_spotify_auth_manager(
-                scope="playlist-modify-public playlist-modify-private user-read-private"
+                scope="playlist-modify-public playlist-modify-private user-read-private",
+                cache_path=cache_file
             )
             
             st.info("👉 Please connect to Spotify before searching for artists")

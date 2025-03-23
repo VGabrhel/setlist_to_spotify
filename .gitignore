@@ -35,6 +35,8 @@ ENV/
 # Application specific
 .spotify_caches
 *.log
+.spotify_caches
+.spotify_caches-*
 
 # OS specific
 .DS_Store

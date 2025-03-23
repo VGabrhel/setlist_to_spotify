@@ -11,20 +11,23 @@ import io
 import requests
 import base64
 
-def get_spotify_auth_manager(scope="user-read-private"):
-    """Initialize Spotify authentication manager"""
-    spotify_client_id = os.getenv("SPOTIPY_CLIENT_ID")
-    spotify_client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+def get_spotify_auth_manager(scope=None, cache_path=None):
+    """
+    Get a Spotify authentication manager with the specified scope.
     
-    if not spotify_client_id or not spotify_client_secret:
-        raise ValueError("Spotify API credentials not found in environment variables")
+    Args:
+        scope (str, optional): The scope for Spotify authentication.
+        cache_path (str, optional): Path to the cache file for storing tokens.
     
+    Returns:
+        spotipy.oauth2.SpotifyOAuth: The Spotify authentication manager.
+    """
     return SpotifyOAuth(
-        client_id=spotify_client_id,
-        client_secret=spotify_client_secret,
+        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
+        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
         redirect_uri="http://localhost:8501",
         scope=scope,
-        cache_path=".spotify_caches"
+        cache_path=cache_path
     )
 
 def get_spotify_client(auth_token):
