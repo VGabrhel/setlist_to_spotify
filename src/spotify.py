@@ -33,14 +33,18 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
             "SPOTIPY_CLIENT_SECRET environment variables are set."
         )
     
-    # Determine if we're running locally or in production
-    is_local = not st.runtime.exists()
-    
-    if is_local:
-        redirect_uri = "http://localhost:8501"
-    else:
-        # Use the deployed app URL
-        redirect_uri = "https://setlist-to-spotify.streamlit.app"
+    # Get the base URL from Streamlit
+    try:
+        if st._is_running_with_streamlit:
+            # Use the actual URL from Streamlit when available
+            base_url = st.get_option("server.baseUrlPath")
+            redirect_uri = f"http://localhost:8501{base_url}/" if base_url else "http://localhost:8501/"
+        else:
+            # Fallback for local development
+            redirect_uri = "http://localhost:8501/"
+    except:
+        # Default fallback
+        redirect_uri = "http://localhost:8501/"
     
     return SpotifyOAuth(
         client_id=client_id,
