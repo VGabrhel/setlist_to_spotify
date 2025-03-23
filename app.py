@@ -88,27 +88,33 @@ with st.sidebar:
             # Create a unique cache file for this user
             cache_file = f".spotify_caches-{st.session_state['user_id']}"
             
-            spotify_auth_manager = get_spotify_auth_manager(
-                scope="playlist-modify-public playlist-modify-private user-read-private",
-                cache_path=cache_file
-            )
+            # Initialize Spotify auth manager
+            spotify_auth_manager = get_spotify_auth_manager(cache_path=cache_file)
             
-            st.info("👉 Connect your Spotify account to create playlists")
-            if st.button("Connect to Spotify", key="connect_button"):
-                # Store current state before authentication
-                st.session_state["pre_auth_state"] = {
-                    "search_query": st.session_state.get("last_search", ""),
-                    "current_artist": st.session_state.get("current_artist", None),
-                    "current_setlist": st.session_state.get("current_setlist", None),
-                    "selected_artist": st.session_state.get("selected_artist", None),
-                    "selected_setlist": st.session_state.get("selected_setlist", None)
-                }
-                
-                # Get authorization URL and redirect
-                auth_url = spotify_auth_manager.get_authorize_url()
-                st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
+            # Check if we have a cached token
+            token_info = spotify_auth_manager.get_cached_token()
+            
+            if token_info:
+                # If we have a cached token, use it
+                st.session_state["spotify_token_info"] = token_info
+                st.rerun()
+            else:
+                st.info("👉 Connect your Spotify account to create playlists")
+                if st.button("Connect to Spotify", key="connect_button"):
+                    # Store current state before authentication
+                    st.session_state["pre_auth_state"] = {
+                        "search_query": st.session_state.get("last_search", ""),
+                        "current_artist": st.session_state.get("current_artist", None),
+                        "current_setlist": st.session_state.get("current_setlist", None),
+                        "selected_artist": st.session_state.get("selected_artist", None),
+                        "selected_setlist": st.session_state.get("selected_setlist", None)
+                    }
+                    
+                    # Get authorization URL and redirect
+                    auth_url = spotify_auth_manager.get_authorize_url()
+                    st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
         except Exception as e:
-            st.error("Failed to initialize Spotify connection. Please try again later.")
+            st.error(f"Failed to initialize Spotify connection: {str(e)}")
 
 # Check for Spotify authentication callback
 if "code" in st.query_params and not "spotify_token_info" in st.session_state:
@@ -116,10 +122,8 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
         # Create a unique cache file for this user
         cache_file = f".spotify_caches-{st.session_state['user_id']}"
         
-        spotify_auth_manager = get_spotify_auth_manager(
-            scope="playlist-modify-public playlist-modify-private user-read-private",
-            cache_path=cache_file
-        )
+        # Initialize Spotify auth manager
+        spotify_auth_manager = get_spotify_auth_manager(cache_path=cache_file)
         
         # Get the authorization code from the URL
         auth_code = st.query_params["code"]
@@ -148,6 +152,7 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
             Failed to connect to your Spotify account. This might be because:
             1. The authorization was denied or timed out
             2. There was a temporary connection issue
+            3. The app is in development mode and needs to be approved by Spotify
             
             Please try again. If the problem persists, refresh the page.
             

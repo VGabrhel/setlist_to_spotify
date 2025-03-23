@@ -27,16 +27,29 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     client_id = "5c532dca876244fcac1675c51e92e51a"
     client_secret = "e9f5d69eae9141b384221da0691dd939"
     
+    # Define scopes if not provided
+    if scope is None:
+        scope = " ".join([
+            "playlist-modify-public",
+            "playlist-modify-private",
+            "user-read-private",
+            "user-read-email"
+        ])
+    
     # Use the Streamlit Cloud URL as the redirect URI
     redirect_uri = "https://setlist-to-spotify.streamlit.app/"
     
-    return SpotifyOAuth(
+    # Create the auth manager with all necessary parameters
+    auth_manager = SpotifyOAuth(
         client_id=client_id,
         client_secret=client_secret,
         redirect_uri=redirect_uri,
         scope=scope,
-        cache_path=cache_path
+        cache_path=cache_path,
+        show_dialog=True  # Force the consent screen to show
     )
+    
+    return auth_manager
 
 def get_spotify_client(auth_token):
     """Get an authenticated Spotify client"""
