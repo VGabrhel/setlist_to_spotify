@@ -8,6 +8,10 @@ import logging
 import uuid
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Add the project root directory to Python path
 current_dir = Path(__file__).parent.resolve()
@@ -31,7 +35,7 @@ from src.utils import (
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=os.getenv("LOG_LEVEL", "INFO"),
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
@@ -48,6 +52,36 @@ st.markdown("""
 Create Spotify playlists from your favorite band's latest tour setlist. 
 This app will help you create playlists in your Spotify account using setlist data from Setlist.fm.
 """)
+
+# Check if required environment variables are set
+if not os.getenv("SPOTIPY_CLIENT_ID") or not os.getenv("SPOTIPY_CLIENT_SECRET"):
+    st.error("""
+        ⚠️ Spotify API credentials not found!
+        
+        This app requires Spotify API credentials to function. Please set the following environment variables:
+        - SPOTIPY_CLIENT_ID
+        - SPOTIPY_CLIENT_SECRET
+        
+        You can get these credentials by:
+        1. Going to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+        2. Creating a new app
+        3. Getting the Client ID and Client Secret
+    """)
+    st.stop()
+
+if not os.getenv("SETLISTFM_API_KEY"):
+    st.error("""
+        ⚠️ Setlist.fm API key not found!
+        
+        This app requires a Setlist.fm API key to function. Please set the following environment variable:
+        - SETLISTFM_API_KEY
+        
+        You can get an API key by:
+        1. Going to the [Setlist.fm API page](https://api.setlist.fm/docs/1.0/index.html)
+        2. Creating an account
+        3. Requesting an API key
+    """)
+    st.stop()
 
 # Initialize session state for user ID if not exists
 if "user_id" not in st.session_state:
