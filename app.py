@@ -8,10 +8,6 @@ import logging
 import uuid
 import sys
 from pathlib import Path
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Add the project root directory to Python path
 current_dir = Path(__file__).parent.resolve()
