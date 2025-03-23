@@ -21,7 +21,10 @@ def get_setlistfm_headers():
     """Get headers for Setlist.fm API requests"""
     api_key = os.getenv("SETLISTFM_API_KEY")
     if not api_key:
-        raise ValueError("Setlist.fm API key not found in environment variables")
+        raise ValueError(
+            "Setlist.fm API key not found. Please make sure SETLISTFM_API_KEY "
+            "environment variable is set."
+        )
     
     return {
         "x-api-key": api_key,

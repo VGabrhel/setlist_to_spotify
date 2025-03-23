@@ -24,7 +24,7 @@ from src.utils import (
 
 # Configure logging
 logging.basicConfig(
-    level=st.secrets.get("LOG_LEVEL", "INFO"),
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
@@ -35,10 +35,12 @@ st.set_page_config(
     layout="wide"
 )
 
-# Set environment variables from secrets
-os.environ["SPOTIPY_CLIENT_ID"] = st.secrets["SPOTIPY_CLIENT_ID"]
-os.environ["SPOTIPY_CLIENT_SECRET"] = st.secrets["SPOTIPY_CLIENT_SECRET"]
-os.environ["SETLISTFM_API_KEY"] = st.secrets["SETLISTFM_API_KEY"]
+# App title and description
+st.title("Setlist to Spotify")
+st.markdown("""
+Create Spotify playlists from your favorite band's latest tour setlist. 
+This app will help you create playlists in your Spotify account using setlist data from Setlist.fm.
+""")
 
 # Initialize session state for user ID if not exists
 if "user_id" not in st.session_state:
@@ -61,7 +63,7 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
         
         # Clear the URL parameters
         st.query_params.clear()
-        st.success("Successfully connected to Spotify!")
+        st.success("Successfully connected to your Spotify account!")
         
         # Restore the previous state if it exists
         if "pre_auth_state" in st.session_state:
@@ -73,31 +75,33 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
         st.rerun()
     except Exception as e:
         st.error(f"""
-            Failed to authenticate with Spotify. Please check:
-            1. The authorization code is correct
-            2. Your Spotify API credentials are correct
-            3. The redirect URI is added to your Spotify app settings:
-               - For local development: http://localhost:8501
-               - For deployed app: {st.experimental_get_query_params().get("_stcore_url", [None])[0] or "your-deployed-url"}
+            Failed to connect to your Spotify account. This might be because:
+            1. The authorization was denied or timed out
+            2. There was a temporary connection issue
             
-            Error: {str(e)}
+            Please try again. If the problem persists, refresh the page.
+            
+            Error details: {str(e)}
         """)
-
-# App title and description
-st.title("Setlist to Spotify")
-st.markdown("Create Spotify playlists from your favorite band's latest tour setlist")
 
 # Sidebar for configuration
 with st.sidebar:
     st.header("About")
-    st.info("This app creates Spotify playlists based on a band's latest tour setlist using data from Setlist.fm")
+    st.info("""
+        This app lets you create Spotify playlists based on artists' latest tour setlists.
+        
+        To use this app:
+        1. Connect with your Spotify account
+        2. Search for an artist
+        3. Create the playlist in your account
+    """)
     
     st.header("Step 1: Connect to Spotify")
     spotify_connected = False
     
     if "spotify_token_info" in st.session_state:
         spotify_connected = True
-        st.success("✓ Connected to Spotify")
+        st.success("✓ Connected to your Spotify account")
         if st.button("Disconnect from Spotify", key="disconnect_button"):
             # Clear all Spotify-related session state
             keys_to_clear = ["spotify_token_info", "selected_artist", "selected_setlist"]
@@ -120,7 +124,7 @@ with st.sidebar:
                 cache_path=cache_file
             )
             
-            st.info("👉 Please connect to Spotify before searching for artists")
+            st.info("👉 Connect your Spotify account to create playlists")
             if st.button("Connect to Spotify", key="connect_button"):
                 # Store current state before authentication
                 st.session_state["pre_auth_state"] = {
@@ -135,7 +139,7 @@ with st.sidebar:
                 auth_url = spotify_auth_manager.get_authorize_url()
                 st.markdown(f'<meta http-equiv="refresh" content="0;url={auth_url}">', unsafe_allow_html=True)
         except Exception as e:
-            st.error(f"Failed to initialize Spotify authentication: {str(e)}")
+            st.error("Failed to initialize Spotify connection. Please try again later.")
 
 # Main area
 st.header("Step 2: Search for an Artist")

@@ -23,6 +23,16 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     Returns:
         spotipy.oauth2.SpotifyOAuth: The Spotify authentication manager.
     """
+    # Get Spotify credentials from environment variables
+    client_id = os.getenv("SPOTIPY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
+    
+    if not client_id or not client_secret:
+        raise ValueError(
+            "Spotify API credentials not found. Please make sure SPOTIPY_CLIENT_ID and "
+            "SPOTIPY_CLIENT_SECRET environment variables are set."
+        )
+    
     # Determine if we're running locally or in production
     is_local = not st.runtime.exists()
     
@@ -33,8 +43,8 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
         redirect_uri = "https://setlist-to-spotify.streamlit.app"
     
     return SpotifyOAuth(
-        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
+        client_id=client_id,
+        client_secret=client_secret,
         redirect_uri=redirect_uri,
         scope=scope,
         cache_path=cache_path
