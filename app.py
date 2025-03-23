@@ -165,8 +165,8 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
                 2. Select your app
                 3. Click "Edit Settings"
                 4. Make sure these Redirect URIs are added:
-                   - `http://localhost:8501` (for local development)
-                   - Your deployed app URL (e.g., `https://your-app-name.streamlit.app/`)
+                   - `https://setlist-to-playlist.streamlit.app` (for production)
+                   - `https://setlist-to-playlist.streamlit.app/` (with trailing slash)
                 
                 Error details: {str(e)}
             """)
