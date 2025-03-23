@@ -36,15 +36,38 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     # Get the base URL from Streamlit
     try:
         if st._is_running_with_streamlit:
-            # Use the actual URL from Streamlit when available
-            base_url = st.get_option("server.baseUrlPath")
-            redirect_uri = f"http://localhost:8501{base_url}/" if base_url else "http://localhost:8501/"
+            # Get the deployed URL from Streamlit
+            base_url = st.get_option("server.baseUrlPath", "")
+            
+            # Check if we're running on Streamlit Cloud
+            if "STREAMLIT_SHARING_PORT" in os.environ or "STREAMLIT_SERVER_PORT" in os.environ:
+                # Use the full URL from Streamlit Cloud
+                redirect_uri = st.experimental_get_query_params().get("host", [""])[0]
+                if not redirect_uri:
+                    # Fallback to the request URL if available
+                    redirect_uri = st.experimental_get_query_params().get("url", [""])[0]
+                if not redirect_uri:
+                    # Final fallback for Streamlit Cloud
+                    redirect_uri = f"https://{os.environ.get('STREAMLIT_HOST', '')}"
+            else:
+                # Local development
+                redirect_uri = "http://localhost:8501"
+            
+            # Ensure the redirect URI ends with the base URL path
+            if base_url and not redirect_uri.endswith(base_url):
+                redirect_uri = f"{redirect_uri.rstrip('/')}{base_url}"
+            
+            # Ensure the redirect URI ends with a slash
+            if not redirect_uri.endswith('/'):
+                redirect_uri += '/'
         else:
             # Fallback for local development
             redirect_uri = "http://localhost:8501/"
     except:
         # Default fallback
         redirect_uri = "http://localhost:8501/"
+    
+    logging.info(f"Using redirect URI: {redirect_uri}")
     
     return SpotifyOAuth(
         client_id=client_id,
