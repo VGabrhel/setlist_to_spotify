@@ -71,7 +71,7 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     # Get the current URL for the redirect URI
     try:
         # Try to get the current URL from Streamlit
-        current_url = st.experimental_get_query_params().get("redirect_uri", [None])[0]
+        current_url = st.query_params.get("redirect_uri", None)
         
         if current_url:
             # If we have a redirect_uri in the query params, use it
