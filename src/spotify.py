@@ -22,10 +22,13 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
     Returns:
         spotipy.oauth2.SpotifyOAuth: The Spotify authentication manager.
     """
+    # Use the deployed app URL as the redirect URI
+    redirect_uri = "https://setlist-to-spotify.streamlit.app/"
+    
     return SpotifyOAuth(
         client_id=os.getenv("SPOTIPY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
-        redirect_uri="http://localhost:8501",
+        redirect_uri=redirect_uri,
         scope=scope,
         cache_path=cache_path
     )

@@ -76,7 +76,9 @@ if "code" in st.query_params and not "spotify_token_info" in st.session_state:
             Failed to authenticate with Spotify. Please check:
             1. The authorization code is correct
             2. Your Spotify API credentials are correct
-            3. The redirect URI (http://localhost:8501) is added to your Spotify app settings
+            3. The redirect URI is added to your Spotify app settings:
+               - For local development: http://localhost:8501
+               - For deployed app: {st.experimental_get_query_params().get("_stcore_url", [None])[0] or "your-deployed-url"}
             
             Error: {str(e)}
         """)
