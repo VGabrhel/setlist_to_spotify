@@ -36,8 +36,8 @@ def get_spotify_auth_manager(scope=None, cache_path=None):
             "user-read-email"
         ])
     
-    # Use the Streamlit Cloud URL as the redirect URI
-    redirect_uri = "https://setlist-to-spotify.streamlit.app/"
+    # Use localhost for development
+    redirect_uri = "http://localhost:8501"
     
     # Create the auth manager with all necessary parameters
     auth_manager = SpotifyOAuth(
