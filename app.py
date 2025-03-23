@@ -53,6 +53,16 @@ Create Spotify playlists from your favorite band's latest tour setlist.
 This app will help you create playlists in your Spotify account using setlist data from Setlist.fm.
 """)
 
+# Set environment variables from secrets in production, use environment variables in development
+try:
+    # Try to get from Streamlit secrets (production)
+    os.environ["SPOTIPY_CLIENT_ID"] = st.secrets["SPOTIPY_CLIENT_ID"]
+    os.environ["SPOTIPY_CLIENT_SECRET"] = st.secrets["SPOTIPY_CLIENT_SECRET"]
+    os.environ["SETLISTFM_API_KEY"] = st.secrets["SETLISTFM_API_KEY"]
+except (KeyError, FileNotFoundError):
+    # Use environment variables (development)
+    pass
+
 # Check if required environment variables are set
 if not os.getenv("SPOTIPY_CLIENT_ID") or not os.getenv("SPOTIPY_CLIENT_SECRET"):
     st.error("""
